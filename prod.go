@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	defaultcampaigncode string = "XVsdAZGVmY"
+	defaultcampaigncode string = "XVsdAZGVmYd"
 )
 
 type Arith int
