@@ -1,0 +1,11 @@
+# A sample TOML config file.
+[dbchadmin]
+h="localhost:27017"
+d="cuahang"
+u="cuahang"
+p="cuahang1234@"
+[dbchbuild]
+h="localhost:27017"
+d="chbuild"
+u="tmplbuild"
+p="@tmpbu.sex"
