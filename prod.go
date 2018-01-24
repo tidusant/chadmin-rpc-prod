@@ -219,13 +219,13 @@ func RemoveCat(usex models.UserSession) string {
 	lang := args[1]
 	//check product
 
-	prods := rpch.GetProdsByCatId(usex.UserID, usex.Shop.ID.Hex(), code)
+	prods := rpch.GetProdsByCatId(usex.Shop.ID.Hex(), code)
 	for _, prod := range prods {
 		if prod.Langs[lang] != nil {
 			return c3mcommon.ReturnJsonMessage("2", "Catalog not empty", "", "")
 		}
 	}
-	cat := rpch.GetCatByCode(usex.UserID, usex.Shop.ID.Hex(), code)
+	cat := rpch.GetCatByCode(usex.Shop.ID.Hex(), code)
 	if cat.Langs[lang] != nil {
 		//remove slug
 		rpch.RemoveSlug(cat.Langs[lang].Slug, usex.Shop.ID.Hex())
@@ -255,7 +255,7 @@ func RemoveProduct(usex models.UserSession) string {
 	log.Debugf("save prod %s", args)
 	code := args[0]
 	lang := args[1]
-	prod := rpch.GetProdByCode(usex.UserID, usex.Shop.ID.Hex(), code)
+	prod := rpch.GetProdByCode(usex.Shop.ID.Hex(), code)
 	if prod.Langs[lang] != nil {
 		//remove slug
 		rpch.RemoveSlug(prod.Langs[lang].Slug, usex.Shop.ID.Hex())
