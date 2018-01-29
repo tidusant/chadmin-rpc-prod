@@ -423,6 +423,8 @@ func LoadProduct(usex models.UserSession) string {
 	for _, prod := range prods {
 		strlang := "{"
 		for lang, langinfo := range prod.Langs {
+			langinfo.Description = ""
+			langinfo.Content = ""
 			info, _ := json.Marshal(langinfo)
 			strlang += "\"" + lang + "\":" + string(info) + ","
 		}
