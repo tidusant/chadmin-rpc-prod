@@ -61,6 +61,8 @@ func (t *Arith) Run(data string, result *string) error {
 
 	} else if usex.Action == "lc" {
 		*result = LoadCat(usex)
+	} else if usex.Action == "ld" {
+		*result = LoadDetail(usex)
 	} else if usex.Action == "sc" {
 		*result = SaveCat(usex)
 	} else if usex.Action == "rc" {
@@ -94,6 +96,13 @@ func LoadCat(usex models.UserSession) string {
 	} else {
 		strrt += catinfstr[:len(catinfstr)-1] + "]"
 	}
+	log.Debugf("loadcat %s", strrt)
+	return c3mcommon.ReturnJsonMessage("1", "", "success", strrt)
+}
+func LoadDetail(usex models.UserSession) string {
+	prod := rpch.GetProdByCode(usex.Shop.ID.Hex(), usex.Params)
+	info, _ := json.Marshal(prod)
+	strrt := string(info)
 	log.Debugf("loadcat %s", strrt)
 	return c3mcommon.ReturnJsonMessage("1", "", "success", strrt)
 }
