@@ -308,7 +308,8 @@ func SaveProduct(usex models.UserSession) string {
 	prod.Modified = time.Now().UTC().Add(time.Hour + 7)
 
 	//get all product
-	prods := rpch.GetAllProds(prod.UserId, prod.ShopId, true)
+	//prods := rpch.GetAllProds(prod.UserId, prod.ShopId, true)
+	prods := rpch.GetAllProds(prod.UserId, prod.ShopId)
 	newprod := false
 	if prod.Code == "" {
 		newprod = true
@@ -322,13 +323,13 @@ func SaveProduct(usex models.UserSession) string {
 	}
 
 	prodcodes := make(map[string]string)
-	propcodes := make(map[string]string)
+	//propcodes := make(map[string]string)
 	var olditem models.Product
 	for _, item := range prods {
 		prodcodes[item.Code] = item.Code
-		for _, prop := range item.Properties {
-			propcodes[prop.Code] = prop.Code
-		}
+		// for _, prop := range item.Properties {
+		// 	propcodes[prop.Code] = prop.Code
+		// }
 		if !newprod && item.Code == prod.Code {
 			olditem = item
 		}
@@ -443,7 +444,8 @@ func SaveProduct(usex models.UserSession) string {
 }
 func LoadProduct(usex models.UserSession, isMain bool) string {
 
-	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex(), true)
+	//prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex(), true)
+	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex())
 	if len(prods) == 0 {
 		return c3mcommon.ReturnJsonMessage("2", "", "no prod found", "")
 	}
