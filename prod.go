@@ -402,23 +402,23 @@ func SaveProduct(usex models.UserSession) string {
 		}
 	} else {
 		olditem.Langs = prod.Langs
-		olditem.Properties = prod.Properties
+		//olditem.Properties = prod.Properties
 		prod = olditem
 	}
 
 	//create prop code
-	for k, prop := range prod.Properties {
-		if strings.Trim(prop.Code, " ") == "" {
-			for {
-				prop.Code = mystring.RandString(4)
-				if _, ok := propcodes[prop.Code]; !ok {
-					propcodes[prop.Code] = prop.Code
-					prod.Properties[k].Code = prop.Code
-					break
-				}
-			}
-		}
-	}
+	// for k, prop := range prod.Properties {
+	// 	if strings.Trim(prop.Code, " ") == "" {
+	// 		for {
+	// 			prop.Code = mystring.RandString(4)
+	// 			if _, ok := propcodes[prop.Code]; !ok {
+	// 				propcodes[prop.Code] = prop.Code
+	// 				prod.Properties[k].Code = prop.Code
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	strrt := rpch.SaveProd(prod)
 	if strrt == "0" {
@@ -459,9 +459,10 @@ func LoadProduct(usex models.UserSession, isMain bool) string {
 			strlang += "\"" + lang + "\":" + string(info) + ","
 		}
 		strlang = strlang[:len(strlang)-1] + "}"
-		info, _ := json.Marshal(prod.Properties)
-		props := string(info)
-		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + ",\"Properties\":" + props + "},"
+		//info, _ := json.Marshal(prod.Properties)
+		//props := string(info)
+		//strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + ",\"Properties\":" + props + "},"
+		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + ",\"Properties\":\"\"},"
 	}
 	strrt = strrt[:len(strrt)-1] + "]"
 	log.Debugf("loadprod %s", strrt)
