@@ -14,7 +14,6 @@ import (
 	//	"c3m/log"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"net"
 	"net/rpc"
 	"strconv"
@@ -57,7 +56,10 @@ func (t *Arith) Run(data string, result *string) error {
 	usex.Shop = shop
 
 	if usex.Action == "l" {
-		*result = LoadProduct(usex)
+		*result = LoadProduct(usex, true)
+
+	} else if usex.Action == "ls" {
+		*result = LoadProduct(usex, false)
 
 	} else if usex.Action == "lc" {
 		*result = LoadCat(usex)
@@ -72,7 +74,7 @@ func (t *Arith) Run(data string, result *string) error {
 	} else if usex.Action == "r" {
 		*result = RemoveProduct(usex)
 	} else { //default
-		*result = ""
+		*result = c3mcommon.ReturnJsonMessage("-5", "Action not found.", "", "")
 	}
 
 	return nil
@@ -306,23 +308,27 @@ func SaveProduct(usex models.UserSession) string {
 	prod.Modified = time.Now().UTC().Add(time.Hour + 7)
 
 	//get all product
-	prods := rpch.GetAllProds(prod.UserId, prod.ShopId)
+	prods := rpch.GetAllProds(prod.UserId, prod.ShopId, true)
 	newprod := false
 	if prod.Code == "" {
 		newprod = true
 	}
 	//check limit:
 	if newprod {
-		shop := rpch.GetShopById(prod.UserId, prod.ShopId)
-		if shop.Config.MaxProd <= len(prods) {
+
+		if usex.Shop.Config.MaxProd <= len(prods) {
 			return c3mcommon.ReturnJsonMessage("3", "max prod limit", "error", "")
 		}
 	}
 
 	prodcodes := make(map[string]string)
+	propcodes := make(map[string]string)
 	var olditem models.Product
 	for _, item := range prods {
 		prodcodes[item.Code] = item.Code
+		for _, prop := range item.Properties {
+			propcodes[prop.Code] = prop.Code
+		}
 		if !newprod && item.Code == prod.Code {
 			olditem = item
 		}
@@ -396,7 +402,22 @@ func SaveProduct(usex models.UserSession) string {
 		}
 	} else {
 		olditem.Langs = prod.Langs
+		olditem.Properties = prod.Properties
 		prod = olditem
+	}
+
+	//create prop code
+	for k, prop := range prod.Properties {
+		if strings.Trim(prop.Code, " ") == "" {
+			for {
+				prop.Code = mystring.RandString(4)
+				if _, ok := propcodes[prop.Code]; !ok {
+					propcodes[prop.Code] = prop.Code
+					prod.Properties[k].Code = prop.Code
+					break
+				}
+			}
+		}
 	}
 
 	strrt := rpch.SaveProd(prod)
@@ -406,10 +427,10 @@ func SaveProduct(usex models.UserSession) string {
 	log.Debugf("saveprod %s", strrt)
 	//build cat
 	var bs models.BuildScript
-	shop := rpch.GetShopById(usex.UserID, usex.Shop.ID.Hex())
+
 	bs.ShopID = usex.Shop.ID.Hex()
-	bs.TemplateCode = shop.Theme
-	bs.Domain = shop.Domain
+	bs.TemplateCode = usex.Shop.Theme
+	bs.Domain = usex.Shop.Domain
 	bs.Collection = "prodcats"
 	bs.ObjectID = prod.CatId
 	rpb.CreateBuild(bs)
@@ -420,9 +441,9 @@ func SaveProduct(usex models.UserSession) string {
 	rpb.CreateBuild(bs)
 	return c3mcommon.ReturnJsonMessage("1", "", "success", strrt)
 }
-func LoadProduct(usex models.UserSession) string {
+func LoadProduct(usex models.UserSession, isMain bool) string {
 
-	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex())
+	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex(), true)
 	if len(prods) == 0 {
 		return c3mcommon.ReturnJsonMessage("2", "", "no prod found", "")
 	}
@@ -438,7 +459,9 @@ func LoadProduct(usex models.UserSession) string {
 			strlang += "\"" + lang + "\":" + string(info) + ","
 		}
 		strlang = strlang[:len(strlang)-1] + "}"
-		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + "},"
+		info, _ := json.Marshal(prod.Properties)
+		props := string(info)
+		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + ",\"Properties\":" + props + "},"
 	}
 	strrt = strrt[:len(strrt)-1] + "]"
 	log.Debugf("loadprod %s", strrt)
@@ -452,15 +475,15 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "Indicates if debug messages should be printed in log files")
 	flag.Parse()
 
-	logLevel := log.DebugLevel
+	//logLevel := log.DebugLevel
 	if !debug {
-		logLevel = log.InfoLevel
+		//logLevel = log.InfoLevel
 
 	}
 
-	log.SetOutputFile(fmt.Sprintf("adminDash-"+strconv.Itoa(port)), logLevel)
-	defer log.CloseOutputFile()
-	log.RedirectStdOut()
+	// log.SetOutputFile(fmt.Sprintf("adminDash-"+strconv.Itoa(port)), logLevel)
+	// defer log.CloseOutputFile()
+	// log.RedirectStdOut()
 
 	//init db
 	arith := new(Arith)
