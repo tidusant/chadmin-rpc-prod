@@ -390,6 +390,10 @@ func SaveProduct(usex models.UserSession) string {
 			}
 			rpch.CreateSlug(prod.Langs[lang].Slug, usex.Shop.ID.Hex(), "prodcats")
 		}
+
+		if prod.Langs[lang].Unit == "" {
+			prod.Langs[lang].Unit = "unit"
+		}
 	}
 
 	//create code
@@ -400,6 +404,8 @@ func SaveProduct(usex models.UserSession) string {
 				break
 			}
 		}
+		prod.Main = true
+		prod.Publish = true
 	} else {
 		olditem.Langs = prod.Langs
 		olditem.Properties = prod.Properties
