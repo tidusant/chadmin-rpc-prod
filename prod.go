@@ -62,7 +62,9 @@ func (t *Arith) Run(data string, result *string) error {
 		*result = LoadProduct(usex, false)
 
 	} else if usex.Action == "lc" {
-		*result = LoadCat(usex)
+		*result = LoadCat(usex, true)
+	} else if usex.Action == "lcs" {
+		*result = LoadCat(usex, false)
 	} else if usex.Action == "ld" {
 		*result = LoadDetail(usex)
 	} else if usex.Action == "sc" {
@@ -79,9 +81,9 @@ func (t *Arith) Run(data string, result *string) error {
 
 	return nil
 }
-func LoadCat(usex models.UserSession) string {
+func LoadCat(usex models.UserSession, ismain bool) string {
 	log.Debugf("loadcat begin")
-	cats := rpch.GetAllCats(usex.UserID, usex.Shop.ID.Hex())
+	cats := rpch.GetCats(usex.UserID, usex.Shop.ID.Hex(), ismain)
 	strrt := "["
 	catinfstr := ""
 	for _, cat := range cats {
@@ -404,7 +406,6 @@ func SaveProduct(usex models.UserSession) string {
 				break
 			}
 		}
-		prod.Main = true
 		prod.Publish = true
 	} else {
 		olditem.Langs = prod.Langs
@@ -449,7 +450,7 @@ func SaveProduct(usex models.UserSession) string {
 }
 func LoadProduct(usex models.UserSession, isMain bool) string {
 
-	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex(), true)
+	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex(), isMain)
 	if len(prods) == 0 {
 		return c3mcommon.ReturnJsonMessage("2", "", "no prod found", "")
 	}
