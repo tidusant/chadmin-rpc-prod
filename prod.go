@@ -415,6 +415,9 @@ func SaveProduct(usex models.UserSession) string {
 
 	//create prop code
 	for k, prop := range prod.Properties {
+		if strings.Trim(prop.Name, " ") == "" {
+			prod.Properties[k].Name = "Name " + strconv.Itoa(k+1)
+		}
 		if strings.Trim(prop.Code, " ") == "" {
 			for {
 				prop.Code = mystring.RandString(4)
@@ -425,6 +428,7 @@ func SaveProduct(usex models.UserSession) string {
 				}
 			}
 		}
+
 	}
 
 	strrt := rpch.SaveProd(prod)
