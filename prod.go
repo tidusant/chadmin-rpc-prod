@@ -61,6 +61,9 @@ func (t *Arith) Run(data string, result *string) error {
 	} else if usex.Action == "ls" {
 		*result = LoadProduct(usex, false)
 
+	} else if usex.Action == "la" {
+		*result = LoadAllProduct(usex)
+
 	} else if usex.Action == "lc" {
 		*result = LoadCat(usex, true)
 	} else if usex.Action == "lcs" {
@@ -310,7 +313,7 @@ func SaveProduct(usex models.UserSession) string {
 	prod.Modified = time.Now().UTC().Add(time.Hour + 7)
 
 	//get all product
-	prods := rpch.GetAllProds(prod.UserId, prod.ShopId, true)
+	prods := rpch.GetAllProds(prod.UserId, prod.ShopId)
 	newprod := false
 	if prod.Code == "" {
 		newprod = true
@@ -454,7 +457,7 @@ func SaveProduct(usex models.UserSession) string {
 }
 func LoadProduct(usex models.UserSession, isMain bool) string {
 
-	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex(), isMain)
+	prods := rpch.GetProds(usex.UserID, usex.Shop.ID.Hex(), isMain)
 	if len(prods) == 0 {
 		return c3mcommon.ReturnJsonMessage("2", "", "no prod found", "")
 	}
@@ -474,7 +477,42 @@ func LoadProduct(usex models.UserSession, isMain bool) string {
 		props := string(info)
 		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + ",\"Properties\":" + props + "},"
 	}
-	strrt = strrt[:len(strrt)-1] + "]"
+	if len(prods) > 0 {
+		strrt = strrt[:len(strrt)-1] + "]"
+	} else {
+		strrt += "]"
+	}
+	log.Debugf("loadprod %s", strrt)
+	return c3mcommon.ReturnJsonMessage("1", "", "success", strrt)
+
+}
+func LoadAllProduct(usex models.UserSession) string {
+
+	prods := rpch.GetAllProds(usex.UserID, usex.Shop.ID.Hex())
+	if len(prods) == 0 {
+		return c3mcommon.ReturnJsonMessage("2", "", "no prod found", "")
+	}
+
+	strrt := "["
+
+	for _, prod := range prods {
+		strlang := "{"
+		for lang, langinfo := range prod.Langs {
+			langinfo.Description = ""
+			langinfo.Content = ""
+			info, _ := json.Marshal(langinfo)
+			strlang += "\"" + lang + "\":" + string(info) + ","
+		}
+		strlang = strlang[:len(strlang)-1] + "}"
+		info, _ := json.Marshal(prod.Properties)
+		props := string(info)
+		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + ",\"Properties\":" + props + "},"
+	}
+	if len(prods) > 0 {
+		strrt = strrt[:len(strrt)-1] + "]"
+	} else {
+		strrt += "]"
+	}
 	log.Debugf("loadprod %s", strrt)
 	return c3mcommon.ReturnJsonMessage("1", "", "success", strrt)
 
