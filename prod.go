@@ -179,6 +179,7 @@ func SaveCat(usex models.UserSession) string {
 					break
 				}
 			}
+
 			//remove oldslug
 			if !newcat {
 				rpch.RemoveSlug(olditem.Langs[lang].Slug, usex.Shop.ID.Hex())
@@ -300,6 +301,7 @@ func RemoveProduct(usex models.UserSession) string {
 func SaveProduct(usex models.UserSession) string {
 
 	var prod models.Product
+	log.Debugf("unmarshal str: %s", usex.Params)
 	err := json.Unmarshal([]byte(usex.Params), &prod)
 	if !c3mcommon.CheckError("create prod parse json", err) {
 		return c3mcommon.ReturnJsonMessage("0", "create prod fail", "", "")
@@ -411,7 +413,10 @@ func SaveProduct(usex models.UserSession) string {
 		}
 		prod.Publish = true
 	} else {
+		//safe update data
 		olditem.Langs = prod.Langs
+		olditem.CatId = prod.CatId
+		olditem.Main = prod.Main
 		olditem.Properties = prod.Properties
 		prod = olditem
 	}
@@ -475,7 +480,7 @@ func LoadProduct(usex models.UserSession, isMain bool) string {
 		strlang = strlang[:len(strlang)-1] + "}"
 		info, _ := json.Marshal(prod.Properties)
 		props := string(info)
-		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Langs\":" + strlang + ",\"Properties\":" + props + "},"
+		strrt += "{\"Code\":\"" + prod.Code + "\",\"CatId\":\"" + prod.CatId + "\",\"Main\":\"" + strconv.FormatBool(prod.Main) + "\",\"Langs\":" + strlang + ",\"Properties\":" + props + "},"
 	}
 	if len(prods) > 0 {
 		strrt = strrt[:len(strrt)-1] + "]"
