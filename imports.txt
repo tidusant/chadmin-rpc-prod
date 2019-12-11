@@ -3,5 +3,12 @@ github.com/spf13/viper
 github.com/nfnt/resize
 gopkg.in/mgo.v2
 gopkg.in/mgo.v2/bson
-github.com/tidusant/c3m-common/...
-github.com/tidusant/chadmin-repo/...
+github.com/tidusant/c3m-common/log@old4
+github.com/tidusant/c3m-common/mystring@old4
+github.com/tidusant/c3m-common/lzjs@old4
+github.com/tidusant/c3m-common/inflect@old4
+github.com/tidusant/c3m-common/mycrypto@old4
+github.com/tidusant/c3m-common/c3mcommon@old4
+github.com/tidusant/chadmin-repo/models@old2
+github.com/tidusant/chadmin-repo/builder@old2
+github.com/tidusant/chadmin-repo/cuahang@old2
