@@ -26,7 +26,6 @@ const (
 )
 
 type Arith int
-
 func (t *Arith) Run(data string, result *string) error {
 	log.Debugf("Call RPCprod args:" + data)
 	*result = ""
@@ -50,6 +49,7 @@ func (t *Arith) Run(data string, result *string) error {
 	//check shop permission
 	shop := rpch.GetShopById(usex.UserID, ShopID)
 	if shop.Status == 0 {
+
 		*result = c3mcommon.ReturnJsonMessage("-4", "Shop is disabled.", "", "")
 		return nil
 	}
