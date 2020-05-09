@@ -47,7 +47,7 @@ func (t *Arith) Run(data string, result *string) error {
 		usex.Params = args[3]
 	}
 
-	//check shop permissiond
+	//check shop permissiondepush
 	shop := rpch.GetShopById(usex.UserID, ShopID)
 	if shop.Status == 0 {
 
